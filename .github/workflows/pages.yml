@@ -196,8 +196,8 @@ jobs:
             <script type="importmap">
             {
               "imports": {
-                "prism-code-editor": "https://esm.sh/@cyfung1031/prism-code-editor@5.2.0-cdn-esm.1",
-                "prism-code-editor/": "https://esm.sh/@cyfung1031/prism-code-editor@5.2.0-cdn-esm.1/"
+                "prism-code-editor": "https://esm.sh/@cyfung1031/prism-code-editor@5.2.0-cdn-esm.2",
+                "prism-code-editor/": "https://esm.sh/@cyfung1031/prism-code-editor@5.2.0-cdn-esm.2/"
               }
             }
             </script>
