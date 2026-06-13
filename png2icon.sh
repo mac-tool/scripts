@@ -1,18 +1,29 @@
 #!/usr/bin/env bash
-
-: '
-
-### README
-
-chmod +x png2icon.sh
-
-./png2icon.sh \
-  ./my-logo.png \
-  ~/My Project/Demo-app/Resources/AppIcon.icns
-
-NOTE: png file must be square size
-
-'
+# Convert a PNG image into a macOS icon.
+# Tags: macos, icon, png, icns, finder
+#
+# README:
+# This script helps you turn a PNG picture into a macOS icon.
+# Use a square PNG image. 1024x1024 is best.
+#
+# Step 1: Make it executable
+#   chmod +x png2icon.sh
+#
+# Step 2: Create an .icns icon file
+#   ./png2icon.sh input.png output.icns
+#
+# Step 3: Or apply the icon to an app, file, or folder
+#   ./png2icon.sh input.png /path/to/app-or-folder
+#
+# Example for icns:
+#   ./png2icon.sh logo.png AppIcon.icns
+#   ./png2icon.sh my-logo.png ~/My Project/Demo-app/Resources/AppIcon.icns
+#
+# Example for app:
+#   ./png2icon.sh logo.png "/Applications/My App.app"
+#
+# Tip:
+# Replace input.png with your PNG file path.
 
 set -euo pipefail
 

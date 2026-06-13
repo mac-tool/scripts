@@ -1,0 +1,468 @@
+name: Publish Scripts Catalog
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "github-pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Generate searchable scripts catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p _site
+
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const { execFileSync } = require("child_process");
+
+          const repo = process.env.GITHUB_REPOSITORY || "mac-tool/scripts";
+          const branch = process.env.GITHUB_REF_NAME || "main";
+
+          function walk(dir) {
+            let files = [];
+            for (const item of fs.readdirSync(dir)) {
+              if (item.startsWith(".git") || item === "_site" || item === "node_modules") continue;
+
+              const full = path.join(dir, item);
+              const stat = fs.statSync(full);
+
+              if (stat.isDirectory()) {
+                files = files.concat(walk(full));
+              } else if (item.endsWith(".sh")) {
+                files.push(full);
+              }
+            }
+            return files;
+          }
+
+          function escapeHtml(str) {
+            return String(str)
+              .replaceAll("&", "&amp;")
+              .replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;")
+              .replaceAll('"', "&quot;")
+              .replaceAll("'", "&#039;");
+          }
+
+          function firstCommentBlock(content) {
+            const lines = content.split(/\r?\n/);
+            const comments = [];
+
+            for (const line of lines) {
+              if (line.startsWith("#!") || line.trim() === "") continue;
+              if (line.trim().startsWith("#")) {
+                comments.push(line.replace(/^#\s?/, ""));
+              } else {
+                break;
+              }
+            }
+
+            return comments.join("\n").trim();
+          }
+
+          function extractUsage(content, file) {
+            const usageMatch = content.match(/(?:^|\n)#?\s*((?:README|Usage):[\s\S]{0,1800}?)(?=\n\n|\n# [A-Z][A-Za-z ]+:|\n[a-zA-Z0-9_-]+\(\)|$)/i);
+            if (usageMatch) return usageMatch[1].trim();
+
+            try {
+              const output = execFileSync("bash", [file, "--help"], {
+                encoding: "utf8",
+                timeout: 3000,
+                stdio: ["ignore", "pipe", "pipe"]
+              });
+              if (output.trim()) return output.trim().slice(0, 3000);
+            } catch (_) {}
+
+            try {
+              const output = execFileSync("bash", [file, "-h"], {
+                encoding: "utf8",
+                timeout: 3000,
+                stdio: ["ignore", "pipe", "pipe"]
+              });
+              if (output.trim()) return output.trim().slice(0, 3000);
+            } catch (_) {}
+
+            return `bash ${file}`;
+          }
+
+          function extractDescription(content, commentBlock, file) {
+            const basename = path.basename(file);
+
+            const descFromComment = commentBlock
+              .split(/\r?\n/)
+              .map(line => line.trim())
+              .filter(Boolean)
+              .find(line =>
+                !line.toLowerCase().startsWith("usage:") &&
+                !line.toLowerCase().startsWith("author:") &&
+                !line.toLowerCase().startsWith("license:")
+              );
+
+            if (descFromComment) return descFromComment;
+
+            const echoDesc = content.match(/(?:description|desc)\s*=\s*["']([^"']+)["']/i);
+            if (echoDesc) return echoDesc[1];
+
+            return `Shell script: ${basename}`;
+          }
+
+          function extractTags(content, relativePath) {
+            const words = new Set();
+
+            relativePath
+              .replace(/\.sh$/, "")
+              .split(/[\/\-_]+/)
+              .forEach(w => w && words.add(w.toLowerCase()));
+
+            const tagMatch = content.match(/#\s*tags?:\s*(.+)/i);
+            if (tagMatch) {
+              tagMatch[1]
+                .split(/[, ]+/)
+                .map(x => x.trim().toLowerCase())
+                .filter(Boolean)
+                .forEach(x => words.add(x));
+            }
+
+            return [...words].slice(0, 8);
+          }
+
+          const scripts = walk(".")
+            .sort()
+            .map(file => {
+              const content = fs.readFileSync(file, "utf8");
+              const relativePath = file.replace(/^\.\//, "");
+              const commentBlock = firstCommentBlock(content);
+
+              return {
+                name: path.basename(file),
+                path: relativePath,
+                description: extractDescription(content, commentBlock, relativePath),
+                usage: extractUsage(content, relativePath),
+                tags: extractTags(content, relativePath),
+                sourceUrl: `https://github.com/${repo}/blob/${branch}/${relativePath}`,
+                rawUrl: `https://raw.githubusercontent.com/${repo}/${branch}/${relativePath}`
+              };
+            });
+
+          const app = `<!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Scripts Catalog</title>
+            <style>
+              :root {
+                color-scheme: light dark;
+                --bg: #0f172a;
+                --panel: #111827;
+                --panel-2: #1f2937;
+                --text: #e5e7eb;
+                --muted: #9ca3af;
+                --brand: #38bdf8;
+                --border: #334155;
+              }
+
+              * {
+                box-sizing: border-box;
+              }
+
+              body {
+                margin: 0;
+                font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                background:
+                  radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 35rem),
+                  linear-gradient(180deg, #020617, var(--bg));
+                color: var(--text);
+                min-height: 100vh;
+              }
+
+              header {
+                max-width: 1100px;
+                margin: 0 auto;
+                padding: 4rem 1.25rem 2rem;
+              }
+
+              h1 {
+                margin: 0;
+                font-size: clamp(2.25rem, 6vw, 4.75rem);
+                line-height: 1;
+                letter-spacing: -0.06em;
+              }
+
+              .subtitle {
+                margin-top: 1rem;
+                max-width: 680px;
+                color: var(--muted);
+                font-size: 1.1rem;
+              }
+
+              main {
+                max-width: 1100px;
+                margin: 0 auto;
+                padding: 0 1.25rem 4rem;
+              }
+
+              .toolbar {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                padding: 1rem 0;
+                backdrop-filter: blur(16px);
+              }
+
+              input {
+                width: 100%;
+                padding: 1rem 1.1rem;
+                border-radius: 1rem;
+                border: 1px solid var(--border);
+                background: rgba(15, 23, 42, 0.88);
+                color: var(--text);
+                font-size: 1rem;
+                outline: none;
+              }
+
+              input:focus {
+                border-color: var(--brand);
+                box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+              }
+
+              .meta {
+                margin: 0.75rem 0 1.25rem;
+                color: var(--muted);
+                font-size: 0.95rem;
+              }
+
+              .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1rem;
+              }
+
+              .card {
+                border: 1px solid var(--border);
+                border-radius: 1.25rem;
+                background: rgba(17, 24, 39, 0.86);
+                overflow: hidden;
+                box-shadow: 0 24px 70px rgba(0, 0, 0, 0.25);
+              }
+
+              .card-body {
+                padding: 1.1rem;
+              }
+
+              .name {
+                margin: 0;
+                font-size: 1.25rem;
+              }
+
+              .path {
+                margin-top: 0.25rem;
+                color: var(--muted);
+                font-size: 0.85rem;
+              }
+
+              .description {
+                margin-top: 0.85rem;
+                color: #d1d5db;
+              }
+
+              .tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.4rem;
+                margin-top: 1rem;
+              }
+
+              .tag {
+                padding: 0.25rem 0.55rem;
+                border: 1px solid var(--border);
+                border-radius: 999px;
+                color: var(--muted);
+                font-size: 0.75rem;
+              }
+
+              details {
+                border-top: 1px solid var(--border);
+                background: rgba(2, 6, 23, 0.45);
+              }
+
+              summary {
+                cursor: pointer;
+                padding: 0.85rem 1.1rem;
+                color: var(--brand);
+                font-weight: 650;
+              }
+
+              pre {
+                margin: 0;
+                padding: 1rem 1.1rem 1.2rem;
+                overflow: auto;
+                color: #d1d5db;
+                font-size: 0.85rem;
+              }
+
+              .actions {
+                display: flex;
+                gap: 0.6rem;
+                padding: 0 1.1rem 1.1rem;
+              }
+
+              a.button {
+                text-decoration: none;
+                color: var(--text);
+                border: 1px solid var(--border);
+                border-radius: 0.7rem;
+                padding: 0.55rem 0.75rem;
+                font-size: 0.85rem;
+              }
+
+              a.button:hover {
+                border-color: var(--brand);
+              }
+
+              .empty {
+                color: var(--muted);
+                padding: 2rem;
+                border: 1px dashed var(--border);
+                border-radius: 1rem;
+                text-align: center;
+              }
+            </style>
+          </head>
+          <body>
+            <header>
+              <h1>Scripts Catalog</h1>
+              <p class="subtitle">
+                Searchable documentation for shell scripts in this repository.
+                Generated automatically from script names, paths, comments, tags, and help output.
+              </p>
+            </header>
+
+            <main>
+              <div class="toolbar">
+                <input id="search" type="search" placeholder="Search scripts, usage, tags, or paths..." autofocus />
+                <div class="meta">
+                  <span id="count"></span> ·
+                  <a href="https://github.com/${repo}" style="color: var(--brand)">View repository</a>
+                </div>
+              </div>
+
+              <section id="results" class="grid"></section>
+            </main>
+
+            <script>
+              const scripts = ${JSON.stringify(scripts, null, 2)};
+
+              const search = document.querySelector("#search");
+              const results = document.querySelector("#results");
+              const count = document.querySelector("#count");
+
+              function escapeHtml(str) {
+                return String(str)
+                  .replaceAll("&", "&amp;")
+                  .replaceAll("<", "&lt;")
+                  .replaceAll(">", "&gt;")
+                  .replaceAll('"', "&quot;")
+                  .replaceAll("'", "&#039;");
+              }
+
+              function render() {
+                const q = search.value.trim().toLowerCase();
+
+                const filtered = scripts.filter(script => {
+                  const haystack = [
+                    script.name,
+                    script.path,
+                    script.description,
+                    script.usage,
+                    ...(script.tags || [])
+                  ].join(" ").toLowerCase();
+
+                  return haystack.includes(q);
+                });
+
+                count.textContent = q
+                  ? \`\${filtered.length} of \${scripts.length} scripts found\`
+                  : \`\${scripts.length} scripts indexed\`;
+
+                if (!filtered.length) {
+                  results.className = "";
+                  results.innerHTML = '<div class="empty">No scripts matched your search.</div>';
+                  return;
+                }
+
+                results.className = "grid";
+                results.innerHTML = filtered.map(script => \`
+                  <article class="card">
+                    <div class="card-body">
+                      <h2 class="name">\${escapeHtml(script.name)}</h2>
+                      <div class="path">\${escapeHtml(script.path)}</div>
+                      <p class="description">\${escapeHtml(script.description)}</p>
+                      <div class="tags">
+                        \${(script.tags || []).map(tag => \`<span class="tag">\${escapeHtml(tag)}</span>\`).join("")}
+                      </div>
+                    </div>
+
+                    <details>
+                      <summary>Usage</summary>
+                      <pre><code>\${escapeHtml(script.usage)}</code></pre>
+                      <div class="actions">
+                        <a class="button" href="\${script.sourceUrl}">Source</a>
+                        <a class="button" href="\${script.rawUrl}">Raw</a>
+                      </div>
+                    </details>
+                  </article>
+                \`).join("");
+              }
+
+              search.addEventListener("input", render);
+              render();
+            </script>
+          </body>
+          </html>`;
+
+          fs.writeFileSync("_site/index.html", app);
+          fs.writeFileSync("_site/scripts.json", JSON.stringify(scripts, null, 2));
+
+          console.log(`Generated catalog for ${scripts.length} scripts.`);
+          NODE
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

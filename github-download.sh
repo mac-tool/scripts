@@ -1,18 +1,29 @@
 #!/usr/bin/env bash
-
-: '
-
-### README
-
-chmod +x github-download.sh
-
-./github-download.sh \
-  --user jszipp \
-  --repo jszipp \
-  --branch main \
-  --folder demo
-
-'
+# Download a GitHub repo or only one folder from a GitHub repo.
+# Tags: github, download, repo, folder, git
+#
+# README:
+# This script helps you download files from GitHub.
+# Copy this script, make it executable, then run one command.
+#
+# Step 1: Make it executable
+#   chmod +x github-download.sh
+#
+# Step 2: Download a whole repo
+#   ./github-download.sh --user OWNER --repo REPO
+#
+# Step 3: Download only one folder
+#   ./github-download.sh --user OWNER --repo REPO --folder path/to/folder
+#
+# Example:
+#   ./github-download.sh --user mac-tool --repo scripts
+#
+# Example with folder:
+#   ./github-download.sh --user jszipp --repo jszipp --branch main --folder demo
+#   ./github-download.sh --user imputnet --repo helium-macos --branch main --folder patches/helium/macos
+#
+# Tip:
+# Replace OWNER, REPO, and path/to/folder with your real GitHub values.
 
 set -euo pipefail
 
