@@ -90,7 +90,13 @@ jobs:
               /(?:^|\n)#?\s*((?:README|Usage):[\s\S]{0,3000}?)(?=\n\n|\n# [A-Z][A-Za-z ]+:|\n[a-zA-Z0-9_-]+\(\)|$)/i
             );
 
-            if (match) return match[1].trim();
+            if (match) {
+              return match[1]
+                .split(/\r?\n/)
+                .map(line => line.replace(/^#\s?/, ""))
+                .join("\n")
+                .trim();
+            }
 
             try {
               const output = execFileSync("bash", [file, "--help"], {
