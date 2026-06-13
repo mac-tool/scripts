@@ -259,7 +259,7 @@ jobs:
                 grid-template-columns: 1fr auto;
                 gap: 1rem;
                 align-items: start;
-                padding: 2.4rem 0 1.2rem;
+                padding: 2rem 0 1rem;
               }
 
               .badge {
@@ -276,19 +276,19 @@ jobs:
               }
 
               h1 {
-                margin: 0.9rem 0 0;
+                margin: 0.75rem 0 0;
                 max-width: 920px;
-                font-size: clamp(2.15rem, 6vw, 5.4rem);
-                line-height: 0.92;
-                letter-spacing: -0.065em;
+                font-size: clamp(2.35rem, 6vw, 5rem);
+                line-height: 0.95;
+                letter-spacing: -0.06em;
               }
 
               .subtitle {
-                max-width: 820px;
-                margin: 1rem 0 0;
+                max-width: 760px;
+                margin: 0.85rem 0 0;
                 color: var(--muted);
-                font-size: 1.05rem;
-                line-height: 1.6;
+                font-size: 1rem;
+                line-height: 1.55;
               }
 
               .top-actions {
@@ -473,13 +473,13 @@ jobs:
                 display: grid;
                 grid-template-columns: minmax(0, 1fr) auto;
                 gap: 1rem;
-                padding: 1.15rem;
+                padding: 1rem 1.15rem;
                 border-bottom: 1px solid var(--border);
               }
 
               .script-title {
                 margin: 0;
-                font-size: 1.45rem;
+                font-size: 1.35rem;
                 letter-spacing: -0.035em;
                 overflow-wrap: anywhere;
               }
@@ -487,14 +487,15 @@ jobs:
               .script-path {
                 margin-top: 0.35rem;
                 color: var(--muted);
-                font-size: 0.86rem;
+                font-size: 0.82rem;
                 overflow-wrap: anywhere;
               }
 
               .script-desc {
-                margin: 0.85rem 0 0;
+                margin: 0.7rem 0 0;
                 color: var(--soft);
-                line-height: 1.55;
+                line-height: 1.5;
+                font-size: 0.92rem;
               }
 
               .workspace-actions {
@@ -507,24 +508,25 @@ jobs:
 
               .workspace-body {
                 display: grid;
-                grid-template-columns: minmax(260px, 0.78fr) minmax(460px, 1.22fr);
-                min-height: 640px;
+                grid-template-columns: minmax(240px, 0.55fr) minmax(560px, 1.45fr);
+                min-height: 720px;
               }
 
               .readme-pane {
                 border-right: 1px solid var(--border);
                 min-width: 0;
+                background: var(--panel2);
               }
 
               .pane-title {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                min-height: 3rem;
+                min-height: 2.75rem;
                 border-bottom: 1px solid var(--border);
-                padding: 0.78rem 1rem;
+                padding: 0.68rem 0.9rem;
                 color: var(--muted);
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 font-weight: 950;
                 text-transform: uppercase;
                 letter-spacing: 0.06em;
@@ -532,13 +534,13 @@ jobs:
 
               .readme {
                 margin: 0;
-                padding: 1rem;
-                max-height: 680px;
+                padding: 0.9rem 1rem;
+                max-height: 360px;
                 overflow: auto;
                 white-space: pre-wrap;
                 color: var(--soft);
-                font-size: 0.88rem;
-                line-height: 1.55;
+                font-size: 0.8rem;
+                line-height: 1.48;
               }
 
               .code-pane {
@@ -568,7 +570,7 @@ jobs:
               }
 
               .editor-wrap {
-                padding: 1rem;
+                padding: 0.9rem 1rem 1rem;
               }
 
               .editor-meta {
@@ -578,7 +580,7 @@ jobs:
                 gap: 0.75rem;
                 margin-bottom: 0.55rem;
                 color: var(--muted);
-                font-size: 0.82rem;
+                font-size: 0.78rem;
                 font-weight: 850;
               }
 
@@ -593,34 +595,36 @@ jobs:
               .editor-host {
                 position: relative;
                 display: block;
-                height: min(70vh, 720px);
-                min-height: 520px;
+                height: min(78vh, 860px);
+                min-height: 620px;
                 border: 1px solid var(--border);
                 border-radius: 1rem;
                 overflow: auto;
                 background: var(--panel2);
-              }              
+                font-size: 0.78rem;
+                line-height: 1.45;
+              }
 
               .editor-host.hidden {
                 display: none;
-              }              
+              }
 
               .editor-host > * {
                 height: 100%;
                 min-height: 100%;
-              }              
+              }
 
               .fallback-editor {
                 width: 100%;
                 height: 100%;
-                min-height: 520px;
+                min-height: 620px;
                 resize: vertical;
                 border: 0;
                 outline: 0;
-                padding: 1rem;
+                padding: 0.85rem;
                 font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-                font-size: 0.86rem;
-                line-height: 1.55;
+                font-size: 0.78rem;
+                line-height: 1.45;
                 color: var(--text);
                 background: var(--panel2);
                 overflow: auto;
@@ -657,16 +661,21 @@ jobs:
                 }
 
                 .script-list {
-                  max-height: 420px;
+                  max-height: 360px;
                 }
 
                 .workspace-body {
                   grid-template-columns: 1fr;
+                  min-height: auto;
                 }
 
                 .readme-pane {
                   border-right: 0;
                   border-bottom: 1px solid var(--border);
+                }
+
+                .readme {
+                  max-height: 260px;
                 }
               }
 
@@ -674,21 +683,21 @@ jobs:
                 .hero,
                 .workspace-head {
                   grid-template-columns: 1fr;
-                }              
+                }
 
                 .top-actions,
                 .workspace-actions {
                   justify-content: flex-start;
-                }              
+                }
 
                 .editor-host {
-                  height: 65vh;
-                  min-height: 360px;
+                  height: 68vh;
+                  min-height: 420px;
                   max-height: none;
-                }              
+                }
 
                 .fallback-editor {
-                  min-height: 360px;
+                  min-height: 420px;
                 }
               }
             </style>
@@ -705,11 +714,9 @@ jobs:
               <header class="hero">
                 <div>
                   <div class="badge">🧰 Searchable shell script toolbox</div>
-                  <h1>Find a script. Read it. Edit a copy. Paste it.</h1>
+                  <h1>Scripts Catalog</h1>
                   <p class="subtitle">
-                    This page is generated automatically from the shell scripts in this repository.
-                    Search by name, tag, README, usage, or source code. The original code is read-only;
-                    the scratch editor is only for browser-side copy/paste edits.
+                    Search, preview, edit a scratch copy, and copy shell scripts directly from the browser.
                   </p>
                 </div>
 
@@ -872,7 +879,8 @@ jobs:
                 return {
                   get value() {
                     return textarea.value;
-                  }
+                  },
+                  update() {}
                 };
               }
 
@@ -912,6 +920,22 @@ jobs:
                 }
               }
 
+              function refreshVisibleEditor() {
+                requestAnimationFrame(() => {
+                  const editor = activeTab === "original"
+                    ? currentEditors?.original
+                    : currentEditors?.scratch;
+
+                  if (editor && typeof editor.update === "function") {
+                    editor.update();
+                  }
+
+                  if (editor && typeof editor.refresh === "function") {
+                    editor.refresh();
+                  }
+                });
+              }
+
               function renderList() {
                 shownScripts.textContent = filtered.length;
 
@@ -947,33 +971,21 @@ jobs:
               }
 
               function showTab(tab) {
-                activeTab = tab;              
+                activeTab = tab;
 
                 const originalHost = workspace.querySelector(".original-host");
                 const scratchHost = workspace.querySelector(".scratch-host");
                 const originalTab = workspace.querySelector(".tab-original");
-                const scratchTab = workspace.querySelector(".tab-scratch");              
+                const scratchTab = workspace.querySelector(".tab-scratch");
 
-                if (!originalHost || !scratchHost) return;              
+                if (!originalHost || !scratchHost) return;
 
                 originalHost.classList.toggle("hidden", tab !== "original");
                 scratchHost.classList.toggle("hidden", tab !== "scratch");
                 originalTab.classList.toggle("active", tab === "original");
-                scratchTab.classList.toggle("active", tab === "scratch");              
+                scratchTab.classList.toggle("active", tab === "scratch");
 
-                requestAnimationFrame(() => {
-                  const editor = tab === "original"
-                    ? currentEditors?.original
-                    : currentEditors?.scratch;              
-
-                  if (editor && typeof editor.update === "function") {
-                    editor.update();
-                  }              
-
-                  if (editor && typeof editor.refresh === "function") {
-                    editor.refresh();
-                  }
-                });
+                refreshVisibleEditor();
               }
 
               function renderWorkspace() {
@@ -1043,7 +1055,7 @@ jobs:
                     if (editor && typeof editor.update === "function") {
                       editor.update();
                     }
-                
+
                     if (editor && typeof editor.refresh === "function") {
                       editor.refresh();
                     }
